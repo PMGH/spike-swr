@@ -1,16 +1,20 @@
 import { swrFetcher } from "../../../swr/utils";
 import useSwr, { SWRConfig } from 'swr'
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 type Beer = {
   id: string;
   name: string;
-};
-
+}
 type BeersPageProps = {
   fallback: Beer[]
 }
+type FeaturedBeerProps = {
+  id: string;
+}
 
-const BeersList = () => {
+const StaticBeersList = () => {
   const { data: staticData, error } = useSwr<Beer[]>('/api/beers', swrFetcher);
   console.log({ staticData, error })
   return (
@@ -20,24 +24,28 @@ const BeersList = () => {
   )
 }
 
+const DynamicFeaturedBeer = ({ id }: FeaturedBeerProps) => {
+  const URL = `https://api.punkapi.com/v2/beers/${id}`;
+  const { data: dynamicData, error, isLoading } = useSwr<Beer[]>(URL, swrFetcher, { suspense: true });
+  console.log({ dynamicData, error, isLoading  })
+
+  if (!dynamicData) return <p>Loading...</p>
+  return <p>Featured Beer: {dynamicData[0].name}</p>
+}
+
 const BeersPage = ({ fallback }: BeersPageProps) => {
-  const { data: dynamicData, error } = useSwr<Beer[]>('https://api.punkapi.com/v2/beers/1', swrFetcher);
-  console.log({ dynamicData, error, fallback  })
-
-  const renderFeaturedBeer = () => {
-    if (dynamicData?.length && dynamicData[0]?.name) {
-      return <p>Featured Beer: {dynamicData[0].name}</p>
-    }
-
-    return <p>Loading...</p>
-  }
+  console.log({ fallback })
 
   return (
     <SWRConfig value={{ fallback }}>
       <h1>Beers Page</h1>
-      {renderFeaturedBeer()}
+      <ErrorBoundary fallback={<h2>Could not fetch featured beer</h2>}>
+        <Suspense fallback={<h1>Suspense fallback...</h1>}>
+          <DynamicFeaturedBeer id="1" />
+        </Suspense>
+      </ErrorBoundary>
       <h3>Beers</h3>
-      <BeersList />
+      <StaticBeersList />
     </SWRConfig>
   )
 }
