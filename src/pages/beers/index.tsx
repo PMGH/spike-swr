@@ -29,7 +29,7 @@ const StaticBeersList = () => {
 
 const DynamicFeaturedBeer = ({ id }: FeaturedBeerProps) => {
   const SINGLE_BEER_URL = `https://api.punkapi.com/v2/beers/${id}`;
-  const { data: dynamicData, error, isLoading } = useSwr<Beer[]>(SINGLE_BEER_URL, swrFetcher);
+  const { data: dynamicData, error, isLoading } = useSwr<Beer[]>(SINGLE_BEER_URL, swrFetcher, { suspense: true });
   console.log({ dynamicData, error, isLoading  })
 
   if (isLoading) return <p>Loading...</p>
