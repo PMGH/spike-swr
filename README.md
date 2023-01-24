@@ -175,3 +175,8 @@ Supports use of middleware that can execute logic before and/or after running it
 
 #### DevTools
 Unofficial Chrome and Firefox extensions: https://swr-devtools.vercel.app/
+
+#### Retries
+https://swr.vercel.app/docs/error-handling#error-retry
+- uses exponential backoff algorithm
+- sensible defaults built into `useSWR` but can be overridden using the `onErrorRetry` option
